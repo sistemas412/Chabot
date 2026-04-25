@@ -1,0 +1,87 @@
+:root {
+    --primary: #007bff;
+    --bg-body: #f4f7f6;
+    --bg-white: #ffffff;
+    --bg-chat: #e5ddd5;
+    --msg-user: #dcf8c6;
+    --msg-admin: #ffffff;
+    --text-dark: #333;
+    --border: #ddd;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background: var(--bg-body); 
+    color: var(--text-dark); 
+    height: 100vh; 
+    overflow: hidden; 
+}
+
+.app-container { display: flex; height: 100vh; width: 100vw; }
+
+/* Sidebar */
+#chat-list { 
+    width: 350px; 
+    background: var(--bg-white); 
+    border-right: 1px solid var(--border); 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.sidebar-header { 
+    padding: 20px; 
+    background: var(--primary); 
+    color: white; 
+    font-weight: 600; 
+}
+
+.chat-item { 
+    padding: 15px 20px; 
+    border-bottom: 1px solid #f0f0f0; 
+    cursor: pointer; 
+    transition: background 0.3s;
+}
+
+.chat-item:hover { background: #f9f9f9; }
+.chat-item.active { background: #ebebeb; border-left: 4px solid var(--primary); }
+
+/* Ventana de Chat */
+#chat-window { flex-grow: 1; display: flex; flex-direction: column; background: #efe7dd; }
+
+.chat-header { 
+    padding: 15px 25px; 
+    background: #ededed; 
+    border-bottom: 1px solid var(--border); 
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+}
+
+#messages { 
+    flex-grow: 1; 
+    padding: 20px; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+}
+
+.msg { 
+    margin-bottom: 12px; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    max-width: 65%; 
+    font-size: 0.95rem;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.USUARIO { background: var(--msg-user); align-self: flex-start; border-top-left-radius: 0; }
+.BOT { background: #e8e8e8; align-self: flex-start; color: #555; }
+.ADMIN { background: var(--msg-admin); align-self: flex-end; border-top-right-radius: 0; }
+
+.input-area { padding: 15px 25px; background: #f0f0f0; display: flex; gap: 10px; }
+.input-area input { flex-grow: 1; padding: 12px; border-radius: 25px; border: 1px solid var(--border); outline: none; }
+
+.btn-send { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }

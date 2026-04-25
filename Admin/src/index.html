@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>EMCA Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside id="chat-list">
+            <div class="sidebar-header">EMCA - Chats</div>
+            <div id="users-container"></div>
+        </aside>
+
+        <main id="chat-window">
+            <div class="chat-header">
+                <h3 id="current-chat">Seleccione un chat</h3>
+                <button id="btn-finish" style="display:none" onclick="reactivarBot()">Cerrar Caso</button>
+            </div>
+            <div id="messages"></div>
+            <div class="input-area">
+                <input type="text" id="adminInput" placeholder="Mensaje..." onkeypress="handleKey(event)" disabled>
+                <button class="btn-send" onclick="sendMessage()">Enviar</button>
+            </div>
+        </main>
+    </div>
+    <script src="logica.js"></script>
+</body>
+</html>

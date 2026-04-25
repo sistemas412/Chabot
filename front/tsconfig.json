@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "target": "ES2022",
+    "module": "ES2022",
+    "declaration": false,
+    "declarationMap": false,
+    "moduleResolution": "node",
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": false,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "rootDir": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "paths": {
+      "~/*": ["front/src/*"]
+    }
+  },
+  "include": [
+    "**/*.js",
+    "**/*.ts"
+  ],
+  "exclude": [
+    "front/node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**e2e**",
+    "**mock**"
+  ]
+}
