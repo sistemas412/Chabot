@@ -1,3 +1,16 @@
-node_modules/
+# Archivos de variables de entorno (SECRETOS)
 .env
+.env.local
+.env.production
+
+# Carpetas de dependencias (MUY PESADAS)
+node_modules/
 dist/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs de errores
+npm-debug.log*
+yarn-error.log*
