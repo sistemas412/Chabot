@@ -8,6 +8,7 @@ app.use(express.json());
 
 // Todas las rutas del bot tendrán el prefijo /v1/bot
 app.use('/v1/bot', botRoutes);
+app.use(express.static('front'));
 
 const PORT = 4000;
 app.listen(PORT, () => console.log(`🚀 Backend EMCA listo en puerto ${PORT}`));

@@ -76,17 +76,14 @@ export class BotController {
         }
     }
 
-    static async checkUser(req: Request, res: Response) {
+     static async checkUser(req: Request, res: Response) {
     try {
         const { telefono } = req.params;
-
-        // Forzamos a que 'tel' sea un string sí o sí.
-        // Si 'telefono' es undefined, se convertirá en una cadena vacía ''.
         const tel: string = String(telefono ?? '');
 
-        // Al usar [tel], TypeScript ya no ve un posible 'undefined' dentro del array
+        // AGREGAMOS updated_at a la consulta SQL
         const [rows]: any = await pool.execute(
-            'SELECT nombre AS nombres, cedula, email, bot_activo FROM usuarios WHERE telefono = ?', 
+            'SELECT nombre AS nombres, cedula, email, bot_activo, updated_at FROM usuarios WHERE telefono = ?', 
             [tel]
         );
         
@@ -95,7 +92,6 @@ export class BotController {
         }
 
         return res.status(404).json({ message: 'Usuario no registrado' });
-
     } catch (error) {
         console.error('Error DB:', error);
         return res.status(500).json({ error: 'Error de consulta' });
@@ -144,4 +140,19 @@ export class BotController {
             return res.status(500).json({ error: 'Error interno al solicitar asesor' });
         }
     }
+
+    static async getAllUsers(req: Request, res: Response) {
+    try {
+        // Consultamos todos los usuarios registrados
+        const [rows]: any = await pool.execute(
+            'SELECT nombre AS nombres, telefono, bot_activo, cedula, email FROM usuarios'
+        );
+
+        // Retornamos la lista completa al frontend
+        return res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        return res.status(500).json({ error: 'Error al obtener la lista de usuarios' });
+    }
+  }
 }

@@ -28,11 +28,26 @@ const saveToBackend = async (data: any) => {
 
 // --- 1. FLUJO HIJO: POSTE (Caso 10) ---
 // Se define primero para que menuFlow lo reconozca
+// Se define primero para que menuFlow lo reconozca
 const posteFlow = addKeyword<Provider, Database>(utils.setEvent('POSTE_FLOW'))
     .addAnswer('Por favor, escribe el *Número del Poste* (Ej: ABC-123) para generar el reporte técnico:', 
         { capture: true }, 
-        async (ctx: any, { state, flowDynamic }:{state: any, flowDynamic: any}) => {
+        async (ctx: any, { state, flowDynamic, endFlow }: any) => {
             const numPoste = ctx.body;
+
+            // 1. VERIFICACIÓN DE MODO MANUAL: 
+            // Si el admin activó el modo humano mientras el usuario escribía el poste, el bot debe detenerse.
+            const response = await fetch(`http://localhost:4000/v1/bot/user/${ctx.from}`, {
+                headers: { 'x-api-key': 'EmcaSecret2026' }
+            });
+            const user = await response.json();
+            
+            if (user && user.bot_activo === 0) {
+                console.log(`[POSTE_FLOW] Abortado: Modo manual activo para ${ctx.from}`);
+                return endFlow(); // Detiene el bot inmediatamente
+            }
+
+            // 2. OBTENCIÓN DE DATOS Y ENVÍO:
             const userData = state.getMyState();
             
             await saveToBackend({
@@ -43,9 +58,11 @@ const posteFlow = addKeyword<Provider, Database>(utils.setEvent('POSTE_FLOW'))
             });
 
             await flowDynamic(`✅ Reporte del poste *${numPoste}* enviado exitosamente.`);
+            
+            // Sugerencia: Enviar al usuario de vuelta al menú o preguntar si necesita algo más
+            return await flowDynamic('¿Deseas realizar otra consulta? Escribe *MENÚ* o *GRACIAS*.');
         }
     );
-
 // --- 2. FLUJO INTERMEDIO: MENÚ PRINCIPAL ---
 // Se define segundo para que welcomeFlow pueda saltar aquí
 const menuFlow = addKeyword<Provider, Database>(utils.setEvent('MENU_PRINCIPAL'))
@@ -62,14 +79,20 @@ const menuFlow = addKeyword<Provider, Database>(utils.setEvent('MENU_PRINCIPAL')
             '*9.* Alumbrado',
             '*10.* Número de poste',
             '*11.* Doble factura',
-            '*12.* Solicitar Asesor Humano 👨‍💼',
+            '*12.* Solicitar un asesor 👨‍💼',
             '',
             '-- Escribe el número de tu consulta --'
         ],
        { capture: true },
-        async (ctx: any, { flowDynamic, gotoFlow, fallBack }:{flowDynamic: any, gotoFlow: any, fallBack: any}) => {
+        async (ctx: any, { flowDynamic, gotoFlow, fallBack }: any) => {
             const opcion = ctx.body;
             
+            await saveToBackend({
+                  tipo: 'GUARDAR_MENSAJE',
+                  telefono: ctx.from,
+                  mensaje: opcion,
+                  emisor: 'USUARIO'
+                 });
             // Lista de opciones permitidas
             const opcionesValidas = ['1','2','3','5','6','7','8','9','10','11', '12'];
 
@@ -144,38 +167,42 @@ const menuFlow = addKeyword<Provider, Database>(utils.setEvent('MENU_PRINCIPAL')
 
 // --- 3. FLUJO DE ENTRADA: BIENVENIDA Y REGISTRO ---
 const welcomeFlow = addKeyword<Provider, Database>(['hi', 'hello', 'hola'])
-    .addAction(async (ctx: any, { state, gotoFlow, flowDynamic }:{state: any, gotoFlow: any, flowDynamic: any}) => {
+    .addAction(async (ctx: any, { state, gotoFlow, flowDynamic }: any) => {
         try {
-           const response = await fetch(`http://localhost:4000/v1/bot/user/${ctx.from}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': 'EmcaSecret2026' // La llave 
-                }
+            const response = await fetch(`http://localhost:4000/v1/bot/user/${ctx.from}`, {
+                headers: { 'x-api-key': 'EmcaSecret2026' }
             });
 
-            // 1. Validamos si la respuesta fue exitosa (status 200-299)
-        if (!response.ok) {
-            console.log(`El usuario no existe o el servidor respondió con error: ${response.status}`);
-            return; // No hacemos nada, dejará que el flujo siga a las preguntas de registro
-        }
+            if (!response.ok) return; // Si no existe, sigue al registro normal
 
-            const existingUser = await response.json();
-            
-            if (existingUser && existingUser.nombres) {
-                await state.update({ 
-                    nombre: existingUser.nombres, 
-                    cedula: existingUser.cedula, 
-                    email: existingUser.email 
-                });
-                await flowDynamic(`¡Hola de nuevo, *${existingUser.nombres}*! Gusto en saludarte.`);
-                return gotoFlow(menuFlow); // Usuario ya existe, va al menú
+            const user = await response.json();
+
+            // --- LÓGICA DE EXPIRACIÓN (5 MINUTOS) ---
+            const ahora = Date.now();
+            const ultimaVez = new Date(user.updated_at).getTime(); // Asegúrate de traer este campo de la DB
+            const diferenciaMinutos = (ahora - ultimaVez) / 1000 / 60;
+
+            if (diferenciaMinutos > 5) {
+                console.log(`Sesión expirada para ${ctx.from}. Solicitando datos de nuevo.`);
+                await flowDynamic('Tu sesión ha expirado por seguridad. Por favor, identifícate nuevamente.');
+                return; // Al NO ejecutar gotoFlow(menuFlow), el bot seguirá con las preguntas de nombre/cédula
             }
+
+            // --- SI LA SESIÓN ES RECIENTE Y NO ESTÁ EN MODO MANUAL ---
+            if (user.bot_activo === 1 && user.nombres) {
+                await state.update({ 
+                    nombre: user.nombres, 
+                    cedula: user.cedula 
+                });
+                await flowDynamic(`¡Hola de nuevo, *${user.nombres}*!`);
+                return gotoFlow(menuFlow);
+            }
+
         } catch (error) {
-            console.log("Usuario nuevo o error de conexión");
+            console.error("Error en validación de tiempo:", error);
         }
     })
-    .addAnswer('¡Hola! Bienvenido al asistente virtual de *EMCA* 💧')
+    .addAnswer('Para brindarte una mejor atención, por favor ingresa tu *Nombre Completo*:')
     .addAnswer('Para brindarte una mejor atención, por favor ingresa tu *Nombre Completo*:', 
         { capture: true }, 
         async (ctx: any, { state }:{state: any}) => {

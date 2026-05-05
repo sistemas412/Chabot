@@ -2,28 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>EMCA Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - EMCA</title>
+    <!-- Importamos una fuente más moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
+        <!-- Sidebar: Lista de usuarios -->
         <aside id="chat-list">
-            <div class="sidebar-header">EMCA - Chats</div>
-            <div id="users-container"></div>
+            <div class="sidebar-header">
+                EMCA Admin
+            </div>
+            <!-- Contenedor donde logica.js inyectará los chat-items -->
+            <div id="users-container">
+                <!-- Se llena dinámicamente -->
+            </div>
         </aside>
 
+        <!-- Ventana de Chat Principal -->
         <main id="chat-window">
-            <div class="chat-header">
-                <h3 id="current-chat">Seleccione un chat</h3>
-                <button id="btn-finish" style="display:none" onclick="reactivarBot()">Cerrar Caso</button>
-            </div>
-            <div id="messages"></div>
-            <div class="input-area">
-                <input type="text" id="adminInput" placeholder="Mensaje..." onkeypress="handleKey(event)" disabled>
-                <button class="btn-send" onclick="sendMessage()">Enviar</button>
-            </div>
+            <header class="chat-header">
+                <div class="chat-header__info">
+                    <h3 id="current-chat">Seleccione un chat para comenzar</h3>
+                </div>
+                <!-- Botón para devolver el control al BOT -->
+                <button id="btn-finish" style="display:none" onclick="reactivarBot()">
+                    Finalizar Atención Humana
+                </button>
+            </header>
+
+            <!-- Área de mensajes con fondo de patrón -->
+            <section id="messages">
+                <!-- Se llena dinámicamente con loadChat() -->
+            </section>
+
+            <!-- Área de escritura -->
+            <footer class="input-area">
+                <input 
+                    type="text" 
+                    id="adminInput" 
+                    placeholder="Escribe un mensaje aquí..." 
+                    onkeypress="handleKey(event)" 
+                    disabled
+                >
+                <button class="btn-send" onclick="sendMessage()">
+                    Enviar
+                </button>
+            </footer>
         </main>
     </div>
+
+    <!-- Scripts -->
     <script src="logica.js"></script>
 </body>
 </html>
