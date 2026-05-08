@@ -11,20 +11,43 @@ const PORT = process.env.PORT ?? 3008
 // --- FUNCIÓN BACKEND ---
 const saveToBackend = async (data: any) => {
     try {
-        const response = await fetch('http://localhost:4000/v1/bot/save', { 
+
+        const response = await fetch('http://localhost:4000/v1/bot/save', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': 'EmcaSecret2026' // <--- AGREGAMOS LA LLAVE AQUÍ
+                'x-api-key': 'EmcaSecret2026'
             },
             body: JSON.stringify(data)
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
         return await response.json();
+
     } catch (e) {
         console.error('Error conectando con el backend:', e);
         return null;
     }
 }
+
+const guardarMensaje = async (
+    telefono: string,
+    mensaje: string,
+    emisor: string
+) => {
+
+    await saveToBackend({
+        tipo: 'GUARDAR_MENSAJE',
+        telefono,
+        mensaje,
+        emisor
+    });
+}
+
+
 
 // --- 1. FLUJO HIJO: POSTE (Caso 10) ---
 // Se define primero para que menuFlow lo reconozca
@@ -85,14 +108,15 @@ const menuFlow = addKeyword<Provider, Database>(utils.setEvent('MENU_PRINCIPAL')
         ],
        { capture: true },
         async (ctx: any, { flowDynamic, gotoFlow, fallBack }: any) => {
-            const opcion = ctx.body;
-            
-            await saveToBackend({
-                  tipo: 'GUARDAR_MENSAJE',
-                  telefono: ctx.from,
-                  mensaje: opcion,
-                  emisor: 'USUARIO'
-                 });
+
+          const opcion = ctx.body;
+
+         // GUARDAR MENSAJE DEL USUARIO
+           await guardarMensaje(
+             ctx.from,
+             opcion,
+             'USUARIO'
+             );
             // Lista de opciones permitidas
             const opcionesValidas = ['1','2','3','5','6','7','8','9','10','11', '12'];
 
@@ -103,40 +127,166 @@ const menuFlow = addKeyword<Provider, Database>(utils.setEvent('MENU_PRINCIPAL')
                     'Para poder colaborarte, por favor indica el *número* de la opción que necesitas del menú anterior.'
                 );
             }
-            switch (opcion) {
-                case '1':
-                    await flowDynamic('🕒 *Horarios:* Lun-Vie (7:30am-5:30pm)\n📍 *Dirección:* Carrera 24 No. 39-54');
-                    break;
-                case '2':
-                    await flowDynamic('🚨 *REPORTE DE DAÑOS*\nLínea 24h: +57 302 409 19 10\nFavor indicar dirección y barrio.');
-                    break;
-                case '3':
-                    await flowDynamic('📞 *Líneas de atención:*\nBarcelona: +57 302 409 19 06\nAnticorrupción: 157');
-                    break;
-                case '5':
-                    await flowDynamic('📩 *Radicación de PQR*\nOficial en: https://www.calarca-quindio.gov.co/peticiones-quejas-reclamos/enviar/3');
-                    break;
-                case '6':
-                    await flowDynamic('🚛 *RECOLECCIÓN*\nEspecies: +57 302 409 19 12');
-                    break;
-                case '7':
-                    await flowDynamic('📟 *Medidores*\n📍 Trámite presencial\n⏳ Respuesta: 15 días hábiles.');
-                    break;
-                case '8':
-                    await flowDynamic('🏠 *Predio desocupado*\nRequiere documentos radicados en ventanilla única.');
-                    break;
-                case '9':
-                    await flowDynamic('💡 *ALUMBRADO*\nReportes: +57 302 409 19 13');
-                    break;
-                case '10':
-                    return gotoFlow(posteFlow); // Salto al flujo del poste
-                case '11':
-                    await flowDynamic('💰 *DOBLE FACTURACIÓN*\nTrámite PRESENCIAL con los dos recibos físicos.');
-                    break;
-                case '12':
-                 await flowDynamic('Conectando con un asesor... Por favor espera un momento. El bot se desactivará para que puedas hablar directamente con nosotros.');
-                 return gotoFlow(asesorFlow);
-            }
+                  switch (opcion) {
+
+    case '1': {
+
+        const respuesta =
+        '🕒 *Horarios:* Lun-Vie (7:30am-5:30pm)\n📍 *Dirección:* Carrera 24 No. 39-54';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '2': {
+
+        const respuesta =
+        '🚨 *REPORTE DE DAÑOS*\nLínea 24h: +57 302 4091910\nFavor indicar dirección y barrio.';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '3': {
+
+        const respuesta =
+        '📞 *Líneas de atención:*\nBarcelona: +57 302 409 19 06\nAnticorrupción: 157';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '5': {
+
+        const respuesta =
+        '📩 *Radicación de PQR*\nOficial en: https://www.calarca-quindio.gov.co/peticiones-quejas-reclamos/enviar/3';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '6': {
+
+        const respuesta =
+        '🚛 *RECOLECCIÓN*\nEspecies: +57 302 409 19 12';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '7': {
+
+        const respuesta =
+        '📟 *Medidores*\n📍 Trámite presencial\n⏳ Respuesta: 15 días hábiles.';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '8': {
+
+        const respuesta =
+        '🏠 *Predio desocupado*\nRequiere documentos radicados en ventanilla única.';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+
+        break;
+    }
+
+    case '9': {
+
+        const respuesta =
+        '💡 *ALUMBRADO*\nReportes: +57 302 409 19 13';
+
+        await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+        );
+        break;
+      }
+      case '10':
+           return gotoFlow(posteFlow);
+       case '11': {
+
+          const respuesta =
+          '💰 *DOBLE FACTURACIÓN*\nTrámite PRESENCIAL con los dos recibos físicos.';
+
+          await flowDynamic(respuesta);
+
+        await guardarMensaje(
+            ctx.from,
+            respuesta,
+            'BOT'
+         );
+         break;
+               }
+              case '12': {
+
+                     const respuesta =
+                     'Conectando con un asesor... Por favor espera un momento.';
+                     await flowDynamic(respuesta);
+
+                 await guardarMensaje(
+                   ctx.from,
+                   respuesta,
+                   'BOT'
+              );
+
+    await gotoFlow(asesorFlow);
+    return;
+  }
+}
             return await flowDynamic('¿Deseas consultar algo más? Escribe *MENÚ* para volver o *GRACIAS* para terminar.');
         }
     )
@@ -169,40 +319,34 @@ const menuFlow = addKeyword<Provider, Database>(utils.setEvent('MENU_PRINCIPAL')
 const welcomeFlow = addKeyword<Provider, Database>(['hi', 'hello', 'hola'])
     .addAction(async (ctx: any, { state, gotoFlow, flowDynamic }: any) => {
         try {
-            const response = await fetch(`http://localhost:4000/v1/bot/user/${ctx.from}`, {
-                headers: { 'x-api-key': 'EmcaSecret2026' }
-            });
+            // VALIDAR SI EL BOT ESTÁ PAUSADO
+const response = await fetch(`http://localhost:4000/v1/bot/user/${ctx.from}`, {
+    headers: {
+        'x-api-key': 'EmcaSecret2026'
+    }
+});
 
-            if (!response.ok) return; // Si no existe, sigue al registro normal
+    if (!response.ok) return;
 
-            const user = await response.json();
+     const user = await response.json();
 
-            // --- LÓGICA DE EXPIRACIÓN (5 MINUTOS) ---
-            const ahora = Date.now();
-            const ultimaVez = new Date(user.updated_at).getTime(); // Asegúrate de traer este campo de la DB
-            const diferenciaMinutos = (ahora - ultimaVez) / 1000 / 60;
+     // SI EL BOT ESTÁ DESACTIVADO => NO RESPONDER
+      if (user.bot_activo === 0) {
 
-            if (diferenciaMinutos > 5) {
-                console.log(`Sesión expirada para ${ctx.from}. Solicitando datos de nuevo.`);
-                await flowDynamic('Tu sesión ha expirado por seguridad. Por favor, identifícate nuevamente.');
-                return; // Al NO ejecutar gotoFlow(menuFlow), el bot seguirá con las preguntas de nombre/cédula
-            }
-
-            // --- SI LA SESIÓN ES RECIENTE Y NO ESTÁ EN MODO MANUAL ---
-            if (user.bot_activo === 1 && user.nombres) {
-                await state.update({ 
-                    nombre: user.nombres, 
-                    cedula: user.cedula 
-                });
-                await flowDynamic(`¡Hola de nuevo, *${user.nombres}*!`);
-                return gotoFlow(menuFlow);
-            }
+      // GUARDAR MENSAJE DEL USUARIO
+        await guardarMensaje(
+           ctx.from,
+           ctx.body,
+           'USUARIO'
+        );
+         console.log(`⛔ BOT PAUSADO PARA ${ctx.from}`);
+          return;
+        }
 
         } catch (error) {
             console.error("Error en validación de tiempo:", error);
         }
     })
-    .addAnswer('Para brindarte una mejor atención, por favor ingresa tu *Nombre Completo*:')
     .addAnswer('Para brindarte una mejor atención, por favor ingresa tu *Nombre Completo*:', 
         { capture: true }, 
         async (ctx: any, { state }:{state: any}) => {
@@ -277,44 +421,63 @@ const main = async () => {
     })
 
     // --- ENDPOINT HTTP PARA RESPUESTAS DEL ASESOR ---
-    adapterProvider.server.post('/v1/messages', handleCtx(async (bot: any, req: any, res: any) => {
-        if (!bot) {
-            return res.status(500).json({ error: 'Bot no inicializado' });
+   adapterProvider.server.post(
+'/v1/messages',
+handleCtx(async (bot: any, req: any) => {
+
+    // Verificar que el bot exista
+    if (!bot) {
+        return {
+            error: 'Bot no inicializado'
+        };
+    }
+
+    try {
+
+        const { number, message, urlMedia } = req.body;
+
+        // Validar datos requeridos
+        if (!number || !message) {
+            return {
+                error: 'Faltan campos requeridos (number, message)'
+            };
         }
 
-        try {
-            const { number, message, urlMedia } = req.body;
+        // Enviar mensaje a WhatsApp
+        await bot.sendMessage(number, message, {
+            media: urlMedia ?? null
+        });
 
-            if (!number || !message) {
-                return res.status(400).json({ error: 'Faltan campos requeridos (number, message)' });
-            }
+        // Guardar mensaje del ADMIN en MySQL
+        await fetch('http://localhost:4000/v1/bot/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'EmcaSecret2026'
+            },
+            body: JSON.stringify({
+                tipo: 'GUARDAR_MENSAJE',
+                telefono: number,
+                mensaje: message,
+                emisor: 'ADMIN'
+            })
+        });
 
-            // 1. Enviar el mensaje físico a WhatsApp a través de Meta
-            await bot.sendMessage(number, message, { media: urlMedia ?? null });
+        // Respuesta correcta
+        return {
+            status: 'sended',
+            to: number
+        };
 
-            // 2. INTEGRACIÓN: Guardar en la base de datos que el ADMIN respondió
-            // Esto hace que el mensaje aparezca inmediatamente en el historial del panel
-            await fetch('http://localhost:4000/v1/bot/save', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-api-key': 'EmcaSecret2026' 
-                },
-                body: JSON.stringify({
-                    tipo: 'GUARDAR_MENSAJE',
-                    telefono: number,
-                    mensaje: message,
-                    emisor: 'ADMIN' // Identificamos que fue la jefa/asesor
-                })
-            });
+    } catch (error) {
 
-            return res.status(200).json({ status: 'sended', to: number });
+        console.error('Error al enviar mensaje vía API:', error);
 
-        } catch (error) {
-            console.error('Error al enviar mensaje vía API:', error);
-            return res.status(500).json({ error: 'Error al procesar el mensaje' });
-        }
-    }));
+        return {
+            error: 'Error al procesar el mensaje'
+        };
+    }
+}));
 
     // Iniciar el servidor
     httpServer(+PORT)
@@ -325,3 +488,4 @@ main().catch(err => {
     console.error("🔴 Error al arrancar el bot:", err);
     process.exit(1);
 });
+

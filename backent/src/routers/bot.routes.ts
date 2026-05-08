@@ -12,5 +12,7 @@ router.get('/user/:telefono', BotController.checkUser);
 router.get('/history/:telefono', BotController.getChatHistory);
 router.post('/reactivar', BotController.reactivarBot);
 router.post('/action', BotController.handleBotAction);
-
+router.post('/send-message', BotController.sendMessage);
+router.post('/save', BotController.saveData);
+    
 export default router;

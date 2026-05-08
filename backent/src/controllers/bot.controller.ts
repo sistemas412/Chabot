@@ -155,4 +155,26 @@ export class BotController {
         return res.status(500).json({ error: 'Error al obtener la lista de usuarios' });
     }
   }
+  
+
+
+  /**organizar el mensaje guardado del bot y el usuario y subir el cambio final al repo  */
+   static async sendMessage(req: Request, res: Response) {
+    return BotController.handleBotAction(req, res);
+   }
+
+  static async saveData(req: Request, res: Response) {
+    try {
+
+        return await BotController.handleBotAction(req, res);
+
+    } catch (error) {
+
+        console.error("Error en saveData:", error);
+
+        return res.status(500).json({
+            error: 'Error interno al procesar la información del bot'
+        });
+    }
+  }
 }

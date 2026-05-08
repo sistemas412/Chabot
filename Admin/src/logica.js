@@ -13,22 +13,29 @@ let usersInterval = null; // Control del refresco de la lista de usuarios
  */
 async function fetchUsers() {
     try {
+
         const res = await fetch(`${API_URL}/users`, {
             headers: { 'x-api-key': 'EmcaSecret2026' }
         });
-        
-        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-        
+
+        if (!res.ok) {
+            throw new Error(`Error HTTP: ${res.status}`);
+        }
+
         const users = await res.json();
+
         const container = document.getElementById('users-container');
-        
+
         if (!container) return;
 
         const usersHTML = users.map(u => {
+
             const displayName = u.nombres || u.nombre || u.telefono;
+
             const isManual = u.bot_activo === 0;
+
             const isActive = u.telefono === activePhone ? 'active' : '';
-            
+
             return `
                 <div class="chat-item ${isActive}" onclick="loadChat('${u.telefono}')">
                     <div class="chat-info">
@@ -40,24 +47,27 @@ async function fetchUsers() {
             `;
         }).join('');
 
-        // Solo actualizar si hay cambios para evitar que se pierda el scroll en la lista
         if (container.innerHTML !== usersHTML) {
             container.innerHTML = usersHTML;
         }
-    } catch (e) { 
+
+    } catch (e) {
+
         console.error("Error cargando usuarios:", e);
+
         const container = document.getElementById('users-container');
+
         if(container && !activePhone) {
-            container.innerHTML = '<p style="color:red; padding:10px; font-size:12px;">Error de conexión con Backend</p>';
+            container.innerHTML =
+                '<p style="color:red; padding:10px; font-size:12px;">Error de conexión con Backend</p>';
         }
     }
 }
-
 /**
  * Carga el historial de mensajes de un chat específico
  */
 async function loadChat(phone) {
-    // Si ya estamos en este chat, no reiniciamos todo, solo dejamos que el intervalo siga
+    
     if (activePhone === phone && chatInterval) return;
 
     activePhone = phone;
@@ -86,9 +96,13 @@ async function loadChat(phone) {
             const messages = await res.json();
             
             if (!container) return;
-
-            const newHTML = messages.map(m => `
-                <div class="msg ${m.emisor}">
+  
+            
+            const newHTML = messages.map(m => {
+               const side = (m.emisor === 'bot' || m.emisor === 'admin') ? 'bot' : 'user';
+            
+            return `
+                <div class="msg ${side}">
                     <div class="bubble">
                         ${m.mensaje}
                         <small class="msg-time">
@@ -96,12 +110,13 @@ async function loadChat(phone) {
                         </small>
                     </div>
                 </div>
-            `).join('');
+            `;
+        }).join('');
 
             // Actualización inteligente: solo si hay mensajes nuevos
             if (container.innerHTML !== newHTML) {
                 container.innerHTML = newHTML;
-                container.scrollTop = container.scrollHeight; // Scroll al final
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
             }
         } catch (e) { 
             console.error("Error cargando historial:", e); 
@@ -112,7 +127,7 @@ async function loadChat(phone) {
     await fetchHistory();
     chatInterval = setInterval(fetchHistory, 3000);
     
-    // Resaltar el usuario seleccionado en la lista inmediatamente
+  
     fetchUsers(); 
 }
 
@@ -125,8 +140,7 @@ async function sendMessage() {
     
     if(!text || !activePhone) return;
 
-    // MEJORA: Limpiar input inmediatamente para dar fluidez
-    input.value = '';
+      input.value = '';
     input.focus();
 
     try {
@@ -138,26 +152,21 @@ async function sendMessage() {
 
         if(!res.ok) throw new Error("No se pudo enviar el mensaje");
         
-        // No llamamos a loadChat para no romper el intervalo, 
-        // el setInterval traerá el mensaje en un par de segundos.
+        
     } catch (e) {
         console.error("Error enviando mensaje:", e);
         alert("El mensaje no pudo enviarse. Revisa la conexión con el Bot.");
     }
 }
 
-/**
- * Manejador de teclado para enviar con Enter
- */
+
 function handleKey(e) { 
     if(e.key === 'Enter') {
         sendMessage(); 
     }
 }
 
-/**
- * Finaliza la asesoría humana y reactiva el Bot
- */
+/**finalizar chat */
 async function reactivarBot() {
     if(!activePhone) return;
 
@@ -205,5 +214,5 @@ async function reactivarBot() {
  */
 document.addEventListener('DOMContentLoaded', () => {
     fetchUsers();
-    usersInterval = setInterval(fetchUsers, 5000); // Actualiza la lista de chats cada 5 seg
+    usersInterval = setInterval(fetchUsers, 5000); 
 });
