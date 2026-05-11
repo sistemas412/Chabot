@@ -1,12 +1,13 @@
-/* 
+/* =========================================
    VARIABLES Y CONFIGURACIÓN GLOBAL
-    */
+========================================= */
 :root {
-    /* Paleta de Colores - EMCA */
+
+    /* Colores principales */
     --color-primary: #007bff;
     --color-primary-dark: #0056b3;
     --color-status-human: #d32f2f;
-    
+
     /* Fondos */
     --bg-app: #f4f7f6;
     --bg-sidebar: #ffffff;
@@ -14,23 +15,25 @@
     --bg-header: #ededed;
     --bg-input-area: #f0f0f0;
 
-    /* Burbujas de Chat */
-    --bubble-user: #dcf8c6;
-    --bubble-bot: #f0f0f0;
-    --bubble-admin: #ffffff;
-
-    /* Texto y Bordes */
+    /* Texto */
     --text-main: #333333;
     --text-muted: #666666;
+
+    /* Bordes */
     --border-light: #f0f0f0;
     --border-medium: #dddddd;
 
-    /* Sombras y Radios */
+    /* Sombras */
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.1);
+
+    /* Radios */
     --radius-md: 8px;
     --radius-full: 25px;
 }
 
+/* =========================================
+   RESET
+========================================= */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -45,18 +48,18 @@ body {
     overflow: hidden;
 }
 
-/* 
+/* =========================================
    CONTENEDOR PRINCIPAL
- */
+========================================= */
 .app-container {
     display: flex;
-    height: 100vh;
     width: 100vw;
+    height: 100vh;
 }
 
-/* 
-   SIDEBAR (LISTA DE CHATS)
-  */
+/* =========================================
+   SIDEBAR
+========================================= */
 #chat-list {
     width: 350px;
     background-color: var(--bg-sidebar);
@@ -74,30 +77,34 @@ body {
     letter-spacing: 1px;
 }
 
-/* Contenedor dinámico de usuarios */
 #users-container {
     flex-grow: 1;
     overflow-y: auto;
 }
 
-/* Item de la lista de chat */
+/* =========================================
+   ITEM USUARIO SIDEBAR
+========================================= */
 .chat-item {
     padding: 15px 20px;
     border-bottom: 1px solid var(--border-light);
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
+    justify-content: flex-end;
     flex-direction: column;
     gap: 4px;
+    color: #083d11;
 }
 
 .chat-item:hover {
-    background-color: #f9f9f9;
+    background-color: #0056b3;
 }
 
 .chat-item.active {
-    background-color: #f0f7ff;
+    background-color: #fff;
     border-left: 4px solid var(--color-primary);
+    border-radius: 5px;
 }
 
 .chat-item b {
@@ -116,9 +123,9 @@ body {
     text-transform: uppercase;
 }
 
-/*
-   VENTANA DE CHAT (ÁREA PRINCIPAL)
-   */
+/* =========================================
+   VENTANA CHAT
+========================================= */
 #chat-window {
     flex-grow: 1;
     display: flex;
@@ -127,7 +134,9 @@ body {
     position: relative;
 }
 
-/* Cabecera del Chat */
+/* =========================================
+   HEADER CHAT
+========================================= */
 .chat-header {
     padding: 12px 25px;
     background-color: var(--bg-header);
@@ -143,7 +152,9 @@ body {
     font-weight: 600;
 }
 
-/* Botón Cerrar Caso */
+/* =========================================
+   BOTÓN FINALIZAR
+========================================= */
 #btn-finish {
     background-color: var(--color-status-human);
     color: white;
@@ -159,72 +170,86 @@ body {
     opacity: 0.9;
 }
 
-/* Área de Mensajes */
+/* =========================================
+   ÁREA MENSAJES
+========================================= */
 #messages {
     flex-grow: 1;
     padding: 20px;
     overflow-y: auto;
+
     display: flex;
     flex-direction: column;
     gap: 10px;
-    /* Fondo con patrón de WhatsApp */
+
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     background-attachment: fixed;
 }
 
-/* Burbujas de Mensaje */
+/* =========================================
+   MENSAJE GENERAL
+========================================= */
 .msg {
-    max-width: 65%;
+    display: inline-flex;
+    flex-direction: column;
+
+    max-width: 70%;
+    width: fit-content;
+
     padding: 10px 14px;
-    font-size: 0.92rem;
-    line-height: 1.4;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    position: relative;
-    word-wrap: break-word;
-}
 
-/* Alineaciones según emisor */
+    border-radius: 10px;
+
+    word-break: break-word;
+}
+/* =========================================
+   MENSAJES USUARIO
+========================================= */
 .USUARIO {
-    background-color: #4441ce;
-    align-self: flex-start;
-    border-top-left-radius: 0;
-    display: flex;
-    justify-content: center;
-    align-items:flex-end;
-}
-
-.BOT {
-    background-color: #808080;
-    align-self: flex-start;
-    color: #fff;
-    font-style: italic;
-    border-top-left-radius: 0;
-}
-
-.ADMIN {
-    background-color: #808080;
+    background-color: #dcf8c6;
+    color: #000;
     align-self: flex-end;
     border-top-right-radius: 0;
 }
 
-/* 
-   ÁREA DE ENTRADA (INPUT)
-    */
+/* =========================================
+   MENSAJES BOT
+========================================= */
+.BOT {
+    background-color: #ffffff;
+    color: #000;
+    align-self: flex-start;
+    border-top-left-radius: 0;
+}
+
+/* =========================================
+   MENSAJES ADMIN
+========================================= */
+.ADMIN {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-start;
+    border-top-left-radius: 0;
+}
+/* =========================================
+   ÁREA INPUT
+========================================= */
 .input-area {
     padding: 15px 25px;
     background-color: var(--bg-input-area);
+
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-
 .input-area input {
     flex-grow: 1;
     padding: 12px 18px;
+
     border-radius: var(--radius-full);
     border: 1px solid var(--border-medium);
+
     outline: none;
     font-size: 0.95rem;
 }
@@ -238,14 +263,21 @@ body {
     cursor: not-allowed;
 }
 
+/* =========================================
+   BOTÓN ENVIAR
+========================================= */
 .btn-send {
     background-color: var(--color-primary);
     color: white;
+
     border: none;
     padding: 10px 22px;
+
     border-radius: var(--radius-full);
+
     cursor: pointer;
     font-weight: 600;
+
     transition: background 0.2s;
 }
 
@@ -253,8 +285,43 @@ body {
     background-color: var(--color-primary-dark);
 }
 
-.msg.user { justify-content: flex-end; text-align: right; }
-.msg.user .bubble { background-color: #dcf8c6; } /* Verde WhatsApp */
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 768px) {
 
-.msg.bot { justify-content: flex-start; text-align: left; }
-.msg.bot .bubble { background-color: #ffffff; } /* Blanco */
+    #chat-list {
+        width: 100px;
+    }
+
+    .chat-item b,
+    .chat-item small {
+        display: none;
+    }
+
+    .sidebar-header {
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    .msg {
+        max-width: 90%;
+    }
+}
+
+.msg-time {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 5px;
+    align-self: flex-end;
+}
+
+#messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

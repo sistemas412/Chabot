@@ -12,10 +12,13 @@ let usersInterval = null; // Control del refresco de la lista de usuarios
  * Se ejecuta automáticamente cada 5 segundos para detectar nuevos chats
  */
 async function fetchUsers() {
+
     try {
 
         const res = await fetch(`${API_URL}/users`, {
-            headers: { 'x-api-key': 'EmcaSecret2026' }
+            headers: {
+                'x-api-key': 'EmcaSecret2026'
+            }
         });
 
         if (!res.ok) {
@@ -30,19 +33,27 @@ async function fetchUsers() {
 
         const usersHTML = users.map(u => {
 
-            const displayName = u.nombres || u.nombre || u.telefono;
+            const displayName =
+                u.nombres || u.nombre || u.telefono;
 
             const isManual = u.bot_activo === 0;
 
-            const isActive = u.telefono === activePhone ? 'active' : '';
+            const isActive =
+                u.telefono === activePhone ? 'active' : '';
 
             return `
-                <div class="chat-item ${isActive}" onclick="loadChat('${u.telefono}')">
+                <div class="chat-item ${isActive}"
+                     onclick="loadChat('${u.telefono}')">
+
                     <div class="chat-info">
                         <b>${displayName}</b>
                         <small>${u.telefono}</small>
                     </div>
-                    ${isManual ? '<span class="badge-humano">● Humano</span>' : ''}
+
+                    ${isManual
+                        ? '<span class="status-badge">● Humano</span>'
+                        : ''
+                    }
                 </div>
             `;
         }).join('');
@@ -53,13 +64,25 @@ async function fetchUsers() {
 
     } catch (e) {
 
-        console.error("Error cargando usuarios:", e);
+        console.error(
+            "Error cargando usuarios:",
+            e
+        );
 
-        const container = document.getElementById('users-container');
+        const container =
+            document.getElementById('users-container');
 
-        if(container && !activePhone) {
-            container.innerHTML =
-                '<p style="color:red; padding:10px; font-size:12px;">Error de conexión con Backend</p>';
+        if (container && !activePhone) {
+
+            container.innerHTML = `
+                <p style="
+                    color:red;
+                    padding:10px;
+                    font-size:12px;
+                ">
+                    Error de conexión con Backend
+                </p>
+            `;
         }
     }
 }
@@ -99,18 +122,22 @@ async function loadChat(phone) {
   
             
             const newHTML = messages.map(m => {
-               const side = (m.emisor === 'bot' || m.emisor === 'admin') ? 'bot' : 'user';
+
+    return `
+        <div class="msg ${m.emisor.toUpperCase()}">
             
-            return `
-                <div class="msg ${side}">
-                    <div class="bubble">
-                        ${m.mensaje}
-                        <small class="msg-time">
-                            ${new Date(m.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </small>
-                    </div>
-                </div>
+            ${m.mensaje}
+
+            <small class="msg-time">
+                ${new Date(m.fecha).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+            </small>
+
+        </div>
             `;
+
         }).join('');
 
             // Actualización inteligente: solo si hay mensajes nuevos
