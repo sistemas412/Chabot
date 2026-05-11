@@ -220,6 +220,8 @@ body {
     color: #000;
     align-self: flex-start;
     border-top-left-radius: 0;
+    display: flex;
+   flex-direction: column;
 }
 
 /* =========================================

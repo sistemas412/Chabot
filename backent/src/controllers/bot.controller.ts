@@ -105,7 +105,7 @@ export class BotController {
             return res.status(200).json({ success: true });
         } catch (error) {
             return res.status(500).json({ error: 'Error' });
-        }
+        } 
     }
 
     static async getChatHistory(req: Request, res: Response) {

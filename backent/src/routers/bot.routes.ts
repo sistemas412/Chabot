@@ -14,5 +14,6 @@ router.post('/reactivar', BotController.reactivarBot);
 router.post('/action', BotController.handleBotAction);
 router.post('/send-message', BotController.sendMessage);
 router.post('/save', BotController.saveData);
+router.post('/reactivar', BotController.reactivarBot);
     
 export default router;

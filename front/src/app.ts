@@ -10,6 +10,7 @@ import {
 
 import { MemoryDB as Database } from '@builderbot/bot';
 import { MetaProvider as Provider } from '@builderbot/provider-meta';
+import { userInfo } from 'os';
 
 dotenv.config();
 
@@ -72,7 +73,19 @@ const flowGracias = addKeyword<Provider, Database>([
     '✅ Fue un gusto atenderte.',
     'EMCA agradece tu contacto.',
     'Escribe *HOLA* cuando necesites ayuda nuevamente.'
-]);
+], 
+
+null,
+async (ctx: any) => {
+
+    await guardarMensaje(
+        ctx.from,
+     `✅ Fue un gusto atenderte.
+      EMCA agradece tu contacto.
+      Escribe *HOLA* cuando necesites ayuda nuevamente.`,
+        'BOT'
+    );
+});
 
 /* =========================================================
    FLOW MENU
@@ -95,7 +108,7 @@ const flowMenuPrincipal = addKeyword<Provider, Database>([
    FLOW POSTE
 ========================================================= */
 
-const posteFlow = addKeyword<Provider, Database>('POSTE_FLOW')
+const posteFlow = addKeyword(utils.setEvent('POSTE_FLOW'))
 
 .addAnswer(
     'Por favor escribe el número del poste:',
@@ -137,7 +150,7 @@ const posteFlow = addKeyword<Provider, Database>('POSTE_FLOW')
    FLOW ASESOR
 ========================================================= */
 
-const asesorFlow = addKeyword<Provider, Database>('ASESOR_FLOW')
+const asesorFlow = addKeyword(utils.setEvent('ASESOR_FLOW'))
 
 .addAnswer(
     'Has solicitado un asesor. El administrador se pondrá en contacto contigo pronto.',
@@ -167,7 +180,7 @@ const asesorFlow = addKeyword<Provider, Database>('ASESOR_FLOW')
    MENU PRINCIPAL
 ========================================================= */
 
-const menuFlow = addKeyword<Provider, Database>('MENU_PRINCIPAL')
+const menuFlow = addKeyword(['menu', 'menú'])
 
 .addAnswer(
 [
@@ -406,7 +419,7 @@ async (ctx: any, { flowDynamic, gotoFlow, fallBack }: any) => {
 ========================================================= */
 const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
 
-.addAction(async (ctx: any, { flowDynamic, endFlow }: any) => {
+.addAction(async (ctx: any) => {
 
     // GUARDAR SIEMPRE EL MENSAJE DEL USUARIO
     await guardarMensaje(
@@ -426,19 +439,25 @@ const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
             }
         );
 
-        if (!response.ok) return endFlow();
+        if (!response.ok){
+            console.log("Backent no responde");
+            return;
+        }
 
         const user = await response.json();
 
         // SI EL BOT ESTÁ EN MODO ASESOR
-        if (user && user.bot_activo === 0) {
+         if (
+            Number(user?.bot_activo) === 0 &&
+            !['hola', 'hi', 'hello']
+                .includes(ctx.body.toLowerCase())
+        ) {
 
-            console.log(`⛔ BOT PAUSADO PARA ${ctx.from}`);
+            console.log(
+                `⛔ BOT PAUSADO PARA ${ctx.from}`
+            );
 
-            // NO RESPONDER NADA
-            return endFlow();
         }
-
     } catch (error) {
 
         console.error(
@@ -446,7 +465,6 @@ const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
             error
         );
 
-        return endFlow();
     }
 })
 
@@ -461,6 +479,12 @@ const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
             'USUARIO'
         );
 
+        await guardarMensaje(
+            ctx.from,
+            'Para brindarte una mejor atención, por favor ingresa tu *Nombre Completo*:',
+            'BOT'
+        )
+
         await state.update({
             nombre: ctx.body
         });
@@ -468,7 +492,7 @@ const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
 )
 
 .addAnswer(
-    'Gracias. Ahora ingresa tu número de *Cédula*:',
+    'Ahora ingresa tu número de *Cédula*:',
     { capture: true },
     async (ctx: any, { state, fallBack }: any) => {
 
@@ -476,6 +500,12 @@ const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
             ctx.from,
             ctx.body,
             'USUARIO'
+        );
+
+        await guardarMensaje(
+            ctx.from,
+            'Ahora ingresa tu número de *Cédula*:',
+            'BOT'
         );
 
         if (!/^\d+$/.test(ctx.body)) {
@@ -508,6 +538,12 @@ const welcomeFlow = addKeyword<Provider, Database>(['hola', 'hi', 'hello'])
             ctx.from,
             ctx.body,
             'USUARIO'
+        );
+
+        await guardarMensaje(
+            ctx.from,
+            'Por último, ingresa tu *Correo Electrónico*:',
+            'BOT'
         );
 
         if (!ctx.body.includes('@')) {
@@ -555,14 +591,6 @@ Escribe el número de tu consulta
 
         await guardarMensaje(
             ctx.from,
-            '✅ ¡Datos registrados exitosamente!',
-            'BOT'
-        );
-
-        await flowDynamic(menuTexto);
-
-        await guardarMensaje(
-            ctx.from,
             menuTexto,
             'BOT'
         );
@@ -570,56 +598,6 @@ Escribe el número de tu consulta
         return gotoFlow(menuFlow);
     }
 );
-
-
-
-
-const capturaHumanoFlow = addKeyword<Provider, Database>([
-    utils.setEvent('CAPTURA_HUMANO')
-])
-
-.addAction(async (ctx: any, { endFlow }: any) => {
-
-    try {
-
-        const response = await fetch(
-            `http://localhost:4000/v1/bot/user/${ctx.from}`,
-            {
-                headers: {
-                    'x-api-key': 'EmcaSecret2026'
-                }
-            }
-        );
-
-        if (!response.ok) return endFlow();
-
-        const user = await response.json();
-
-        // SI EL BOT ESTÁ PAUSADO
-        if (user && user.bot_activo === 0) {
-
-            // GUARDAR MENSAJES DEL USUARIO
-            await guardarMensaje(
-                ctx.from,
-                ctx.body,
-                'USUARIO'
-            );
-
-            console.log(
-                `💬 MENSAJE HUMANO ${ctx.from}: ${ctx.body}`
-            );
-
-            return endFlow();
-        }
-
-    } catch (e) {
-
-        console.error(
-            'Error captura humano:',
-            e
-        );
-    }
-});
 
 /* =========================================================
    FLOW EXTRA
@@ -639,6 +617,83 @@ const fullSamplesFlow = addKeyword<Provider, Database>([
         )
     }
 );
+ /**Captura de mensajes del usuario con el administrador */
+
+const capturaMensajesFlow = addKeyword<Provider, Database>(
+    utils.setEvent('MESSAGE')
+)
+
+.addAction(async (ctx: any, { endFlow }: any) => {
+
+    await guardarMensaje(
+        ctx.from,
+        ctx.body,
+        'USUARIO'
+    );
+
+    try {
+
+        const response = await fetch(
+            `http://localhost:4000/v1/bot/user/${ctx.from}`,
+            {
+                headers: {
+                    'x-api-key': 'EmcaSecret2026'
+                }
+            }
+        );
+
+        if (!response.ok) return;
+
+        const user = await response.json();
+
+        // 👨‍💼 MODO HUMANO
+        if (Number(user?.bot_activo) === 0) {
+
+            console.log(
+                `💬 HUMANO ${ctx.from}: ${ctx.body}`
+            );
+
+            return endFlow();
+        }
+
+    } catch (e) {
+
+        console.error(e);
+    }
+});
+
+const validarModoHumano = async (ctx: any) => {
+
+    await guardarMensaje(
+        ctx.from,
+        ctx.body,
+        'USUARIO'
+    );
+
+    try {
+
+        const response = await fetch(
+            `http://localhost:4000/v1/bot/user/${ctx.from}`,
+            {
+                headers: {
+                    'x-api-key': 'EmcaSecret2026'
+                }
+            }
+        );
+
+        if (!response.ok) return false;
+
+        const user = await response.json();
+
+        return Number(user?.bot_activo) === 0;
+
+    } catch (error) {
+
+        console.error(error);
+
+        return false;
+    }
+};
 
 /* =========================================================
    MAIN
@@ -655,7 +710,7 @@ const main = async () => {
     asesorFlow,
     flowGracias,
     flowMenuPrincipal,
-    capturaHumanoFlow
+    capturaMensajesFlow
 ]);
 
     const adapterProvider = createProvider(
@@ -704,6 +759,10 @@ const main = async () => {
                     }
                 );
 
+                const botEstaPausado = (user: any) => {
+                 return user?.bot_activo === 0;
+                };
+
                 await guardarMensaje(
                     number,
                     message,
@@ -715,6 +774,7 @@ const main = async () => {
                     to: number
                 };
 
+             
             } catch (e) {
 
                 console.error(e);
